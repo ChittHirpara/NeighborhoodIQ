@@ -22,3 +22,118 @@
 .animate-in {
   animation: in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+@page {
+  size: A4;
+  margin: 12mm;
+}
+
+@media print {
+  html,
+  body,
+  #root {
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  body.printing-report * {
+    visibility: hidden !important;
+  }
+
+  body.printing-report .report-print-root,
+  body.printing-report .report-print-root * {
+    visibility: visible !important;
+  }
+
+  body.printing-report .report-print-root {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #111827 !important;
+    animation: none !important;
+  }
+
+  body.printing-report button,
+  body.printing-report iframe,
+  body.printing-report .leaflet-control-container {
+    display: none !important;
+  }
+
+  body.printing-report .overflow-y-auto,
+  body.printing-report .overflow-hidden,
+  body.printing-report .h-screen,
+  body.printing-report .h-full {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  body.printing-report .report-print-root > div,
+  body.printing-report .report-print-root .relative.border {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body.printing-report .report-print-root .bg-zinc-950\/80,
+  body.printing-report .report-print-root .bg-zinc-950\/60,
+  body.printing-report .report-print-root .bg-zinc-900\/60,
+  body.printing-report .report-print-root .bg-zinc-900\/40,
+  body.printing-report .report-print-root .bg-black\/40,
+  body.printing-report .report-print-root .bg-blue-950\/20,
+  body.printing-report .report-print-root .bg-emerald-950\/30,
+  body.printing-report .report-print-root .bg-amber-950\/30,
+  body.printing-report .report-print-root .bg-rose-950\/30 {
+    background: #ffffff !important;
+  }
+
+  body.printing-report .report-print-root .relative.border,
+  body.printing-report .report-print-root [class*="border-zinc"],
+  body.printing-report .report-print-root [class*="border-amber"],
+  body.printing-report .report-print-root [class*="border-blue"],
+  body.printing-report .report-print-root [class*="border-emerald"],
+  body.printing-report .report-print-root [class*="border-rose"] {
+    border-color: #d1d5db !important;
+  }
+
+  body.printing-report .report-print-root .shadow-2xl,
+  body.printing-report .report-print-root [class*="shadow"] {
+    box-shadow: none !important;
+  }
+
+  body.printing-report .report-print-root .text-white,
+  body.printing-report .report-print-root .text-zinc-100,
+  body.printing-report .report-print-root .text-zinc-200,
+  body.printing-report .report-print-root .text-zinc-300,
+  body.printing-report .report-print-root .text-zinc-400,
+  body.printing-report .report-print-root .text-zinc-500,
+  body.printing-report .report-print-root .text-zinc-600 {
+    color: #111827 !important;
+  }
+
+  body.printing-report .report-print-root .text-amber-500,
+  body.printing-report .report-print-root .text-amber-400 {
+    color: #b45309 !important;
+  }
+
+  body.printing-report .report-print-root .text-emerald-400 {
+    color: #047857 !important;
+  }
+
+  body.printing-report .report-print-root .text-rose-400 {
+    color: #be123c !important;
+  }
+
+  body.printing-report .report-print-root .text-blue-400,
+  body.printing-report .report-print-root .text-blue-500 {
+    color: #1d4ed8 !important;
+  }
+
+  body.printing-report .report-print-root .backdrop-blur-xl,
+  body.printing-report .report-print-root .backdrop-blur-md {
+    backdrop-filter: none !important;
+  }
+}

@@ -3,6 +3,7 @@ import { Card, CardHeader } from '../components/ui/Card';
 import { MapPin, TrendingUp, Activity, Plus, ShieldCheck, Zap, Server, Globe2, FileText, Search as SearchIcon, BarChart3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip } from 'recharts';
+import { useSEO } from '../lib/useSEO';
 
 const GLOBAL_STATS = [
   { name: 'Jan', value: 4000 },
@@ -15,6 +16,12 @@ const GLOBAL_STATS = [
 ];
 
 export default function Dashboard() {
+  useSEO({
+    title: 'Command Center',
+    description: 'Your NeighborhoodIQ dashboard — view recent scans, system status, and launch new neighborhood due diligence reports across India.',
+    canonicalPath: '/dashboard',
+  });
+
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans p-6 md:p-10 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/5 blur-[150px] rounded-full pointer-events-none z-0"></div>
@@ -120,13 +127,13 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <h4 className="text-zinc-200 font-serif italic">{item.name}</h4>
-                      <p className="text-[10px] uppercase font-mono tracking-widest text-zinc-500">{item.city} • {item.date}</p>
+                      <p className="text-[10px] uppercase font-mono tracking-widest text-zinc-500">{item.city} / {item.date}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-right hidden sm:block">
                       <div className="text-xl font-light text-amber-500">{item.score}</div>
-                      <div className="text-[9px] uppercase font-mono tracking-widest text-zinc-600">Locus Score</div>
+                      <div className="text-[9px] uppercase font-mono tracking-widest text-zinc-600">Neighborhood Score</div>
                     </div>
                     <Link to="/search" className="p-2 bg-zinc-900 border border-zinc-800 rounded text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors">
                       <SearchIcon className="h-4 w-4" />

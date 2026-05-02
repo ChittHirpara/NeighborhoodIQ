@@ -34,8 +34,8 @@ export interface NeighborhoodData {
       topInstitutions: string[];
     };
     crimeAndSafety: {
-      score: number; // 0-100
-      level: "Low" | "Moderate" | "High";
+      score: number; // 0-100, higher = safer
+      safetyLevel: "Low" | "Moderate" | "High"; // "High" = very safe area
       details: string;
       trend: "Improving" | "Stable" | "Worsening";
       historicalData: { year: string; score: number }[];
@@ -52,7 +52,7 @@ export interface NeighborhoodData {
       avgPowerCutsPerMonth: number;
       waterSources: string[];
       details: string;
-      powerOutageHistory: { month: string; outages: number }[]; // 12 months History
+      powerOutageHistory: { month: string; outages: number }[]; // 12 months history
     };
     floodRisk: {
       score: number; // 0-100
@@ -66,6 +66,7 @@ export interface NeighborhoodData {
     };
     traffic: {
       score: number; // 0-100
+      level?: "Low" | "Moderate" | "High";
       peakHourDelayMins: number;
       details: string;
     };

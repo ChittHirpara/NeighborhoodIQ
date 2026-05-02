@@ -1,13 +1,13 @@
 // Card Component
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { cn } from "../../lib/utils";
 
-export function Card({ className, children }: { className?: string; children: React.ReactNode }) {
+export function Card({ className, style, children }: { className?: string; style?: CSSProperties; children: React.ReactNode }) {
   return (
     <div className={cn(
       "relative border border-zinc-800/80 bg-zinc-900/60 p-6 rounded-xl flex flex-col backdrop-blur-xl shadow-2xl overflow-hidden transition-all duration-500 hover:border-zinc-700/80 hover:bg-zinc-900/80", 
       className
-    )}>
+    )} style={style}>
       {/* Subtle top glare */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-zinc-500/10 to-transparent"></div>
       <div className="relative z-10 h-full flex flex-col">

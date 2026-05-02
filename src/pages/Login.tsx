@@ -1,9 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapIcon, ArrowRight, ShieldCheck, Database, LayoutDashboard } from 'lucide-react';
+import { useSEO } from '../lib/useSEO';
 
 export default function Login() {
   const navigate = useNavigate();
+
+  useSEO({
+    title: 'Login',
+    description: 'Sign in to NeighborhoodIQ — your AI-powered real estate due diligence platform for neighborhoods across India.',
+    canonicalPath: '/login',
+  });
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +30,7 @@ export default function Login() {
             <MapIcon className="h-8 w-8" />
           </div>
           <h1 className="text-3xl font-light tracking-[0.2em] uppercase text-zinc-100 flex gap-2">
-            Locus <span className="text-amber-500 font-medium">Premium</span>
+            Neighborhood<span className="text-amber-500 font-medium">IQ</span>
           </h1>
           <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest mt-4 flex items-center gap-2">
             <ShieldCheck className="h-4 w-4" /> Secure Authentication Gateway
@@ -40,7 +47,7 @@ export default function Login() {
               <div className="relative">
                 <input 
                   type="email" 
-                  defaultValue="analyst@locus.ai"
+                  defaultValue="demo@neighborhoodiq.ai"
                   required
                   className="w-full bg-zinc-950/80 border border-zinc-800 rounded-lg px-4 py-3 text-zinc-200 font-mono text-sm focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all placeholder-zinc-700" 
                   placeholder="Enter your email"

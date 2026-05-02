@@ -1,38 +1,50 @@
 import React, { useState } from 'react';
-import { Search as SearchIcon, Map as MapIcon, Loader2, ChevronRight, X, LayoutDashboard, LogOut } from 'lucide-react';
+import { Search as SearchIcon, Map as MapIcon, Loader2, ChevronRight, X, LayoutDashboard, LogOut, Maximize2, Minimize2 } from 'lucide-react';
 import { fetchNeighborhoodReport } from '../services/aiService';
 import ReportDashboard from '../components/ReportDashboard';
 import { InteractiveMap } from '../components/InteractiveMap';
 import { DrillLevel, NeighborhoodData } from '../types';
 import { cn } from '../lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
+import { useSEO } from '../lib/useSEO';
 
 export default function Search() {
   const [level, setLevel] = useState<DrillLevel>('india');
   const [city, setCity] = useState('');
   const [society, setSociety] = useState('');
   const [property, setProperty] = useState('');
-  
+
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState<NeighborhoodData | null>(null);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [dashboardFullscreen, setDashboardFullscreen] = useState(false);
   const navigate = useNavigate();
+
+  useSEO({
+    title: city ? `Neighborhood Report — ${city}` : 'Scan a Neighborhood',
+    description: city
+      ? `AI-generated due diligence report for ${city}. View schools, safety, AQI, property trends and flood risk.`
+      : 'Search any city, society, or property in India for an instant AI-powered neighborhood report.',
+    keywords: city ? `${city} neighborhood, ${city} real estate, buy home ${city}` : 'neighborhood search India',
+    canonicalPath: '/search',
+  });
 
   const executeDrillDown = async (targetLevel: DrillLevel, fetchCity: string, fetchSociety?: string, fetchProperty?: string) => {
     setLoading(true);
-    setError("");
-    setDashboardOpen(false); // Close dashboard during drill down to focus on map
-    
+    setError('');
+    setDashboardOpen(false);
+
     try {
       const data = await fetchNeighborhoodReport(fetchCity, fetchSociety, fetchProperty);
       setReportData(data);
       setLevel(targetLevel);
-      setInputValue("");
-      setDashboardOpen(true); // Open when ready
+      setInputValue('');
+      setDashboardOpen(true);
+      setDashboardFullscreen(false);
     } catch (err) {
-      setError("Failed to aggregate data. Please verify location details.");
+      setError('Failed to aggregate data. Please verify location details.');
       console.error(err);
     } finally {
       setLoading(false);
@@ -64,6 +76,7 @@ export default function Search() {
       setProperty('');
       setReportData(null);
       setDashboardOpen(false);
+      setDashboardFullscreen(false);
     } else if (target === 'city') {
       setSociety('');
       setProperty('');
@@ -76,11 +89,11 @@ export default function Search() {
 
   return (
     <div className="relative h-screen w-full bg-[#050505] text-zinc-100 font-sans overflow-hidden">
-      
+
       {/* Dynamic Interactive Map as Background */}
       <div className="absolute inset-0 z-0 bg-[#050505]">
         <InteractiveMap level={level} loading={loading} data={reportData} societyName={society} />
-        
+
         {/* Animated scanline overlay during loading */}
         {loading && (
           <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
@@ -91,29 +104,29 @@ export default function Search() {
 
       {/* Header / Breadcrumbs */}
       <header className="absolute top-0 left-0 w-full p-6 z-20 flex justify-between gap-4 pointer-events-none">
-        
+
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3 cursor-pointer pointer-events-auto w-fit" onClick={() => resetTo('india')}>
             <div className="w-8 h-8 bg-amber-500 rounded-sm flex items-center justify-center text-black font-bold shadow-[0_0_15px_rgba(245,158,11,0.3)]">
               <MapIcon className="h-5 w-5" />
             </div>
             <span className="text-sm font-light tracking-[0.2em] uppercase text-zinc-100 drop-shadow-md">
-              Locus <span className="text-amber-500 font-medium">Premium</span>
+              Neighborhood<span className="text-amber-500 font-medium">IQ</span>
             </span>
           </div>
 
           <nav className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-mono text-zinc-400 overflow-x-auto whitespace-nowrap pb-2 pointer-events-auto w-fit bg-black/40 px-3 py-2 rounded-sm backdrop-blur-sm border border-white/5">
-            <button onClick={() => resetTo('india')} className={cn("hover:text-amber-500 transition-colors drop-shadow-sm", level === 'india' && "text-amber-500")}>India</button>
+            <button onClick={() => resetTo('india')} className={cn('hover:text-amber-500 transition-colors drop-shadow-sm', level === 'india' && 'text-amber-500')}>India</button>
             {city && (
               <>
                 <ChevronRight className="h-3 w-3" />
-                <button onClick={() => resetTo('city')} className={cn("hover:text-amber-500 transition-colors drop-shadow-sm", level === 'city' && "text-amber-500")}>{city}</button>
+                <button onClick={() => resetTo('city')} className={cn('hover:text-amber-500 transition-colors drop-shadow-sm', level === 'city' && 'text-amber-500')}>{city}</button>
               </>
             )}
             {society && (
               <>
                 <ChevronRight className="h-3 w-3" />
-                <button onClick={() => resetTo('society')} className={cn("hover:text-amber-500 transition-colors drop-shadow-sm", level === 'society' && "text-amber-500")}>{society}</button>
+                <button onClick={() => resetTo('society')} className={cn('hover:text-amber-500 transition-colors drop-shadow-sm', level === 'society' && 'text-amber-500')}>{society}</button>
               </>
             )}
             {property && (
@@ -135,11 +148,11 @@ export default function Search() {
           </Link>
         </div>
       </header>
-      
+
       {/* Map Action Overlay */}
       {reportData && !dashboardOpen && !loading && (
         <div className="absolute top-24 right-6 z-20 pointer-events-auto hidden md:block">
-          <button 
+          <button
             onClick={() => setDashboardOpen(true)}
             className="px-6 py-3 bg-zinc-900/80 hover:bg-zinc-800 text-amber-500 border border-zinc-700 hover:border-amber-500/50 text-[10px] uppercase tracking-[0.2em] font-bold rounded-sm transition-all backdrop-blur-md flex items-center gap-2 shadow-xl"
           >
@@ -149,7 +162,7 @@ export default function Search() {
       )}
 
       {/* Overlay Search Input */}
-      <div className={cn("absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-30 transition-transform duration-700", dashboardOpen ? "md:translate-x-[calc(-50%-250px)]" : "")}>
+      <div className={cn('absolute bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-30 transition-transform duration-700', dashboardOpen ? 'md:translate-x-[calc(-50%-250px)]' : '')}>
         {level !== 'property' ? (
           <form onSubmit={handleSearch} className="relative shadow-2xl">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/0 via-amber-500/30 to-amber-500/0 rounded-sm opacity-50 blur"></div>
@@ -157,19 +170,19 @@ export default function Search() {
               <div className="pl-4 text-zinc-500">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin text-amber-500" /> : <SearchIcon className="h-4 w-4" />}
               </div>
-              <input 
+              <input
                 disabled={loading}
                 type="text"
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
                 placeholder={
-                  level === 'india' ? "Target City, Pin Code, or Landmark..." :
-                  level === 'city' ? "Society, Area Name, or Street..." :
-                  "Specific Property/House..."
+                  level === 'india' ? 'Target City, Pin Code, or Landmark...' :
+                  level === 'city' ? 'Society, Area Name, or Street...' :
+                  'Specific Property/House...'
                 }
                 className="w-full py-4 px-4 text-xs tracking-widest uppercase font-mono text-zinc-100 bg-transparent outline-none placeholder-zinc-500"
               />
-              <button 
+              <button
                 disabled={!inputValue.trim() || loading}
                 type="submit"
                 className="px-6 py-4 bg-amber-500 hover:bg-amber-400 text-black text-[10px] uppercase tracking-[0.2em] font-bold rounded-r-sm transition-colors disabled:opacity-30 disabled:hover:bg-amber-500"
@@ -193,22 +206,33 @@ export default function Search() {
       </div>
 
       {/* Right Panel Overlay: AI Dashboard */}
-      <div 
+      <div
         className={cn(
-          "absolute top-0 right-0 h-full w-full md:w-[500px] xl:w-[600px] z-40 bg-zinc-950/90 backdrop-blur-2xl border-l border-white/10 shadow-2xl transition-transform duration-500 ease-in-out flex flex-col",
-          dashboardOpen ? "translate-x-0" : "translate-x-full"
+          'absolute top-0 right-0 h-full w-full md:w-[500px] xl:w-[600px] z-40 bg-zinc-950/90 backdrop-blur-2xl border-l border-white/10 shadow-2xl transition-transform duration-500 ease-in-out flex flex-col',
+          dashboardFullscreen && 'md:w-full xl:w-full border-l-0',
+          dashboardOpen ? 'translate-x-0' : 'translate-x-full'
         )}
       >
         <div className="p-4 border-b border-white/10 flex justify-between items-center sticky top-0 bg-zinc-950/80 backdrop-blur-md z-50">
-          <span className="text-[10px] uppercase tracking-widest font-mono text-amber-500">Telemetry Feed</span>
-          <button 
-            onClick={() => setDashboardOpen(false)}
-            className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-sm transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <span className="text-[10px] uppercase tracking-widest font-mono text-amber-500">Neighborhood Due Diligence Report</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setDashboardFullscreen(value => !value)}
+              className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-sm transition-colors"
+              title={dashboardFullscreen ? 'Exit full screen' : 'View full screen'}
+            >
+              {dashboardFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </button>
+            <button
+              onClick={() => setDashboardOpen(false)}
+              className="p-2 text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-sm transition-colors"
+              title="Close report"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto">
           {reportData ? (
             <ReportDashboard data={reportData} />
@@ -229,7 +253,7 @@ export default function Search() {
           padding: 0 !important;
         }
         .leaflet-popup-tip {
-          background: #18181b !important; /* zinc-900 roughly */
+          background: #18181b !important;
           border: 1px solid rgba(245, 158, 11, 0.3);
         }
         .leaflet-popup-content {

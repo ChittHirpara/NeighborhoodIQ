@@ -4,7 +4,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { NeighborhoodData, DrillLevel, PointOfInterest } from '../types';
-import { MapPin, GraduationCap, TreePine, Hospital, Train, ShoppingBag, Info, Star, Building, Utensils, Coffee, Laptop } from 'lucide-react';
+import { GraduationCap, TreePine, Hospital, Train, ShoppingBag, Info, Star, Building, Utensils, Laptop } from 'lucide-react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 // Fix generic Leaflet icon missing issues in React
@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-// Custom Locus Premium Map Icon
+// Custom NeighborhoodIQ map icon
 const primaryIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -129,7 +129,7 @@ export function InteractiveMap({ level, loading, data, societyName }: { level: D
               <h3 className="text-amber-500 font-mono text-[11px] uppercase tracking-widest mb-2 font-bold border-b border-amber-500/20 pb-1">{data.locationName}</h3>
               <p className="text-xs text-zinc-300 font-sans line-clamp-3 leading-relaxed mb-3">{data.summary.substring(0, 150)}...</p>
               <div className="flex justify-between items-center bg-black/40 p-2 rounded-sm border border-zinc-800">
-                <span className="text-[10px] font-mono text-zinc-500 uppercase">Locus Score</span>
+                <span className="text-[10px] font-mono text-zinc-500 uppercase">Neighborhood Score</span>
                 <span className="text-amber-500 font-mono font-bold">{data.overallScore}/100</span>
               </div>
             </div>

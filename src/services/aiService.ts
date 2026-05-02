@@ -271,11 +271,45 @@ Make sure to include 5 years of historical property value trend data, 5 years of
 
     return JSON.parse(text) as NeighborhoodData;
   } catch (error: any) {
-    if (error?.message?.includes("429") || error?.message?.includes("Quota")) {
-      console.warn("Gemini API quota exceeded, using mock fallback data...");
+    if (
+      error?.message?.includes("429") ||
+      error?.message?.includes("503") ||
+      error?.message?.includes("Quota") ||
+      error?.status === "UNAVAILABLE"
+    ) {
+      console.warn("Gemini API quota/availability exceeded, using mock fallback data...");
       return generateMockFallback(city, society, property);
     }
     throw error;
+  }
+}
+
+export async function askNeighborhoodQuestion(question: string, neighborhoodData: NeighborhoodData, fallbackAnswer: string): Promise<string> {
+  const ai = getAiClient();
+  if (!ai) {
+    return fallbackAnswer;
+  }
+
+  const prompt = `You are NeighborhoodIQ, an expert real estate AI assistant.
+Answer the following user question based strictly on the provided neighborhood data context.
+Keep your answer concise, insightful, and limited to 2-3 sentences.
+Do not hallucinate. If the context does not contain the answer, say so.
+
+User Question: ${question}
+
+Neighborhood Data Context:
+${JSON.stringify(neighborhoodData)}
+`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
+    return response.text || fallbackAnswer;
+  } catch (error) {
+    console.warn("Failed to get AI answer, using rule-based fallback.", error);
+    return fallbackAnswer;
   }
 }
 

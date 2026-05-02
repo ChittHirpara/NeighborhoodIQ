@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
-import { Search, Loader2, Plus, X, ArrowLeft, ArrowRight, Activity, Zap, Droplets, MapPin, BarChart3 } from 'lucide-react';
+import { Search, Loader2, Plus, X, ArrowLeft, BarChart3, AlertTriangle } from 'lucide-react';
 import { Card, CardHeader } from '../components/ui/Card';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Link } from 'react-router-dom';
 import { fetchNeighborhoodReport } from '../services/aiService';
 import { NeighborhoodData } from '../types';
 import { cn } from '../lib/utils';
+import { useSEO } from '../lib/useSEO';
 
 export default function Compare() {
+  useSEO({
+    title: 'Compare Neighborhoods',
+    description: 'Side-by-side AI comparison of up to 3 neighborhoods in India. Compare schools, safety, AQI, property prices, and more.',
+    canonicalPath: '/compare',
+  });
+
   const [inputs, setInputs] = useState<string[]>(['']);
   const [loading, setLoading] = useState(false);
   const [reports, setReports] = useState<NeighborhoodData[]>([]);
+  const [error, setError] = useState('');
 
   const addInput = () => {
     if (inputs.length < 3) {
@@ -35,6 +43,7 @@ export default function Compare() {
     if (validInputs.length === 0) return;
 
     setLoading(true);
+    setError('');
     try {
       const results = await Promise.all(
         validInputs.map(city => fetchNeighborhoodReport(city))
@@ -42,7 +51,7 @@ export default function Compare() {
       setReports(results);
     } catch (e) {
       console.error(e);
-      alert("Failed to load compare data");
+      setError('Failed to load comparison data. Please check the area names or try again.');
     } finally {
       setLoading(false);
     }
@@ -71,30 +80,29 @@ export default function Compare() {
     radarData[6][`Report${idx}`] = r.metrics.traffic.score;
   });
 
-  // power histories
-  const mergedPowerHistory = [];
-  if (reports.length > 0 && reports[0].metrics.utilities.powerOutageHistory) {
-    reports[0].metrics.utilities.powerOutageHistory.forEach((_, monthIdx) => {
-      const monthObj: any = { month: reports[0].metrics.utilities.powerOutageHistory[monthIdx].month };
+  // Safely merge power outage histories (guard against unequal array lengths)
+  const mergedPowerHistory: any[] = [];
+  if (reports.length > 0 && reports[0].metrics.utilities.powerOutageHistory?.length) {
+    reports[0].metrics.utilities.powerOutageHistory.forEach((entry, monthIdx) => {
+      const monthObj: any = { month: entry.month };
       reports.forEach((r, i) => {
-        monthObj[`Report${i}`] = r.metrics.utilities.powerOutageHistory[monthIdx].outages;
+        monthObj[`Report${i}`] = r.metrics.utilities.powerOutageHistory?.[monthIdx]?.outages ?? 0;
       });
       mergedPowerHistory.push(monthObj);
     });
   }
 
-  // merged price histories
-  const mergedPriceHistory = [];
-  if (reports.length > 0 && reports[0].propertyValueTrend.historicalData) {
-    reports[0].propertyValueTrend.historicalData.forEach((_, yrIdx) => {
-      const yrObj: any = { year: reports[0].propertyValueTrend.historicalData[yrIdx].year };
+  // Safely merge price histories
+  const mergedPriceHistory: any[] = [];
+  if (reports.length > 0 && reports[0].propertyValueTrend.historicalData?.length) {
+    reports[0].propertyValueTrend.historicalData.forEach((entry, yrIdx) => {
+      const yrObj: any = { year: entry.year };
       reports.forEach((r, i) => {
-        yrObj[`Report${i}`] = r.propertyValueTrend.historicalData[yrIdx].avgPricePerSqft;
+        yrObj[`Report${i}`] = r.propertyValueTrend.historicalData?.[yrIdx]?.avgPricePerSqft ?? 0;
       });
       mergedPriceHistory.push(yrObj);
     });
   }
-
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans p-6 md:p-10">
@@ -113,13 +121,19 @@ export default function Compare() {
       {reports.length === 0 ? (
         <div className="max-w-xl mx-auto bg-zinc-900/40 border border-zinc-800/50 p-8 rounded-xl backdrop-blur-md mt-20">
           <h2 className="text-sm font-mono tracking-widest text-blue-500 uppercase mb-6 text-center">Select Vectors to Compare</h2>
-          
+          {error && (
+            <div className="mb-5 flex items-start gap-3 rounded border border-rose-900/50 bg-rose-950/30 p-3 text-xs text-rose-300">
+              <AlertTriangle className="h-4 w-4 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
           <div className="space-y-4 mb-8">
             {inputs.map((val, idx) => (
               <div key={idx} className="flex items-center gap-3 relative">
                 <span className="text-[10px] uppercase font-mono tracking-widest text-zinc-600 absolute left-4">N.{idx + 1}</span>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={val}
                   onChange={(e) => updateInput(idx, e.target.value)}
                   placeholder="Enter area or city..."
@@ -135,7 +149,7 @@ export default function Compare() {
           </div>
 
           <div className="flex justify-between items-center">
-            <button 
+            <button
               onClick={addInput}
               disabled={inputs.length >= 3}
               className="text-[10px] uppercase tracking-widest font-mono text-zinc-400 hover:text-white flex items-center gap-2 px-4 py-2 border border-zinc-800 rounded disabled:opacity-50 transition-colors"
@@ -143,24 +157,24 @@ export default function Compare() {
               <Plus className="h-3 w-3" /> Add Vector
             </button>
 
-            <button 
+            <button
               onClick={handleCompare}
               disabled={loading || inputs.filter(i => i.trim()).length === 0}
               className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded text-[10px] uppercase font-mono tracking-widest font-bold transition-all flex items-center gap-2 disabled:opacity-50"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />} 
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               Initialize Comparison
             </button>
           </div>
         </div>
       ) : (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          
+
           <div className="flex justify-between mb-4">
             <h2 className="text-sm uppercase tracking-widest font-mono text-zinc-400">Comparing {reports.length} Vectors</h2>
-             <button onClick={() => setReports([])} className="text-xs uppercase tracking-widest text-blue-500 hover:text-blue-400 border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 rounded-sm">
-                New Comparison
-             </button>
+            <button onClick={() => setReports([])} className="text-xs uppercase tracking-widest text-blue-500 hover:text-blue-400 border border-blue-500/20 bg-blue-500/10 px-4 py-1.5 rounded-sm">
+              New Comparison
+            </button>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -191,12 +205,12 @@ export default function Compare() {
                   <h3 className="text-xl font-serif italic text-white mb-4 pr-4">{r.locationName}</h3>
                   <div className="flex-1 space-y-4">
                     <div className="flex justify-between items-end border-b border-zinc-800 pb-2">
-                      <span className="text-[10px] uppercase tracking-widest text-zinc-500">Locus Score</span>
+                      <span className="text-[10px] uppercase tracking-widest text-zinc-500">Neighborhood Score</span>
                       <span className="text-3xl font-light" style={{ color: colors[i] }}>{r.overallScore}</span>
                     </div>
-                     <div className="flex justify-between items-end border-b border-zinc-800 pb-2">
+                    <div className="flex justify-between items-end border-b border-zinc-800 pb-2">
                       <span className="text-[10px] uppercase tracking-widest text-zinc-500">Flood Risk</span>
-                      <span className={cn("text-xs uppercase font-mono tracking-widest", r.metrics.floodRisk.level === 'Low' ? 'text-emerald-500' : 'text-amber-500')}>{r.metrics.floodRisk.level}</span>
+                      <span className={cn('text-xs uppercase font-mono tracking-widest', r.metrics.floodRisk.level === 'Low' ? 'text-emerald-500' : 'text-amber-500')}>{r.metrics.floodRisk.level}</span>
                     </div>
                     <div className="flex justify-between items-end border-b border-zinc-800 pb-2">
                       <span className="text-[10px] uppercase tracking-widest text-zinc-500">Traffic Delay</span>
@@ -210,7 +224,7 @@ export default function Compare() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
-              <CardHeader title="02. Market Price Trends" subtitle="Average ₹/sqft over last 5 years" />
+              <CardHeader title="02. Market Price Trends" subtitle="Average INR/sqft over last 5 years" />
               <div className="h-[250px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={mergedPriceHistory}>
